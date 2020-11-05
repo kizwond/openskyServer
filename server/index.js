@@ -1,12 +1,22 @@
 const express = require('express')
-const app = express();
 const path = require("path");
 const cors = require('cors')
-const bodyParser = require("body-parser");
+// const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-const config = require("./config/key");
-
+const dotenv = require('dotenv');
+const passport = require('passport');
+const session = require('express-session');
 const mongoose = require("mongoose");
+const morgan = require('morgan');
+const FileStore = require('session-file-store')(session);
+
+dotenv.config();
+const config = require("./config/key");
+const app = express();
+const passportConfig = require('./passport');
+passportConfig();
+
+
 const connect = mongoose.connect(config.mongoURI,
   {
     useNewUrlParser: true, useUnifiedTopology: true,
@@ -16,17 +26,27 @@ const connect = mongoose.connect(config.mongoURI,
   .catch(err => console.log(err));
 
 app.use(cors())
+app.use(morgan('dev'));
+app.use(express.urlencoded({ extended: true }));
+// app.use(bodyParser.json());
+app.use(express.json());
+app.use(cookieParser(process.env.COOKIE_SECRET));
+app.use(session({
+  secret: process.env.COOKIE_SECRET,
+  cookie: {
+      httponly: true,
+      maxAge: 1800000
+  },
+  resave: false,
+  saveUninitialized: false,
+  store : new FileStore()
+}));
 
-app.get('/', (req, res)=>{
-    res.send('Hello World!!!!sangil')
-})
 
+const userRouter = require('./routes/user');
+const writeRouter = require('./routes/write');
+const studyRouter = require('./routes/study');
 
-app.use(bodyParser.urlencoded({ extended: true }));
-//to get json data
-// support parsing of application/json type post data
-app.use(bodyParser.json());
-app.use(cookieParser());
 
 // Serve static assets if in production
 if (process.env.NODE_ENV === "production") {
@@ -38,6 +58,13 @@ if (process.env.NODE_ENV === "production") {
       res.sendFile(path.resolve(__dirname, "../client", "build", "index.html"));
     });
   }
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// app.use('/write', writeRouter);
+// app.use('/study', studyRouter);
+app.use('/api/user', userRouter);
 
 const PORT = process.env.PORT || 5000;
 
