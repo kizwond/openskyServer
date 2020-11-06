@@ -8,35 +8,33 @@ const Studyingcard = require('../models/studyingcard');
 const router = express.Router();
 
 router.post('/register', isNotLoggedIn, async (req, res, next) => {
-  const id = req.body.register_user_id;
-  const password = req.body.register_password;
+  const user_id = req.body.user_id;
+  const password = req.body.password;
+  console.log(password)
 
   try {
-    console.log('성공적1');
-    const exUser = await User.findOne({ id: id });
-    const hash = await bcrypt.hash(password, 12);
-    console.log('성공적2');
+    const exUser = await User.findOne({ user_id: user_id });    
+    const hash = await bcrypt.hash(password, 12);    
     if (exUser) {
       return res.json({msg : '중복된 아이디가 있습니다.'});
     };
     
     let newUser = User.create({
-        id: id,
+        user_id: user_id,
         password: hash,        
         name: '윤상일',
-        email: 'kizwond@gmail.com',
         nickname : '홍익인간',
-        phone : '01093484979',
-        newbook_no: 0
+        email: 'kizwond@gmail.com',
+        phone : '01093484979',        
     })
 
     const phase1studyingcard = await Studyingcard.create({
-      user_id: id,
+      user_id: user_id,
       phase : '1',
       studyingcardlist : [],
     });
     const phase2studyingcard = await Studyingcard.create({
-      user_id: id,
+      user_id: user_id,
       phase : '2',
       studyingcardlist : [],
     });
@@ -44,6 +42,8 @@ router.post('/register', isNotLoggedIn, async (req, res, next) => {
       console.error(error);
       return next(error);
   }
+
+  return res.json({msg : '회원 가입이 완료되었습니다르르'});
 });
 
 router.post('/login', isNotLoggedIn, (req, res, next) => {  
@@ -63,6 +63,8 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
       console.log('req.session', req.session);      
     });
   })(req, res, next); // 미들웨어 내의 미들웨어에는 (req, res, next)를 붙입니다.
+
+  return res.json({msg : '로그인 성공적~'});
 });
 
 router.get('/logout', isLoggedIn, (req, res) => {

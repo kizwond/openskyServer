@@ -1,5 +1,4 @@
 const express = require('express')
-const path = require("path");
 const cors = require('cors')
 // const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
@@ -9,6 +8,7 @@ const session = require('express-session');
 const mongoose = require("mongoose");
 const morgan = require('morgan');
 const FileStore = require('session-file-store')(session);
+const path = require("path");
 
 dotenv.config();
 const config = require("./config/key");
@@ -17,10 +17,11 @@ const passportConfig = require('./passport');
 passportConfig();
 
 
-const connect = mongoose.connect(config.mongoURI,
-  {
-    useNewUrlParser: true, useUnifiedTopology: true,
-    useCreateIndex: true, useFindAndModify: false
+const connect = mongoose.connect(config.mongoURI,{
+    useNewUrlParser: true, 
+    useUnifiedTopology: true,
+    useCreateIndex: true, 
+    useFindAndModify: false
   })
   .then(() => console.log('MongoDB Connected...'))
   .catch(err => console.log(err));
@@ -30,9 +31,11 @@ app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
 // app.use(bodyParser.json());
 app.use(express.json());
-app.use(cookieParser(process.env.COOKIE_SECRET));
+// app.use(cookieParser(process.env.COOKIE_SECRET));
+app.use(cookieParser('dsfsdfsfsdf'));
 app.use(session({
-  secret: process.env.COOKIE_SECRET,
+  // secret: process.env.COOKIE_SECRET,
+  secret: 'dsfsdfsfsdf',
   cookie: {
       httponly: true,
       maxAge: 1800000
