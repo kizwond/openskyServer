@@ -2,29 +2,30 @@ const express = require('express')
 const cors = require('cors')
 // const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-const dotenv = require('dotenv');
-const passport = require('passport');
-const session = require('express-session');
+// const dotenv = require('dotenv');
+require('dotenv').config();
 const mongoose = require("mongoose");
 const morgan = require('morgan');
+const passport = require('passport');
+const session = require('express-session');
 const FileStore = require('session-file-store')(session);
 const path = require("path");
 
-dotenv.config();
-const config = require("./config/key");
+// dotenv.config();
+// const config = require("./config/key");
 const app = express();
 const passportConfig = require('./passport');
 passportConfig();
 
 
-const connect = mongoose.connect(config.mongoURI,{
-    useNewUrlParser: true, 
-    useUnifiedTopology: true,
-    useCreateIndex: true, 
-    useFindAndModify: false
-  })
-  .then(() => console.log('MongoDB Connected...'))
-  .catch(err => console.log(err));
+// const connect = mongoose.connect(config.mongoURI,{
+//     useNewUrlParser: true, 
+//     useUnifiedTopology: true,
+//     useCreateIndex: true, 
+//     useFindAndModify: false
+//   })
+//   .then(() => console.log('MongoDB Connected...'))
+//   .catch(err => console.log(err));
 
 app.use(cors())
 app.use(morgan('dev'));
@@ -33,6 +34,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 // app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(cookieParser('dsfsdfsfsdf'));
+const fileStoreOptions = ({path : '.sessions'});
 app.use(session({
   // secret: process.env.COOKIE_SECRET,
   secret: 'dsfsdfsfsdf',
@@ -42,7 +44,7 @@ app.use(session({
   },
   resave: false,
   saveUninitialized: false,
-  store : new FileStore()
+  store : new FileStore(fileStoreOptions),
 }));
 
 
@@ -50,6 +52,8 @@ const userRouter = require('./routes/user');
 const writeRouter = require('./routes/write');
 const studyRouter = require('./routes/study');
 
+console.log('process.env.NODE_ENV',process.env.NODE_ENV);
+console.log('process.env.COOKIE_SECRET',process.env.COOKIE_SECRET);
 
 // Serve static assets if in production
 if (process.env.NODE_ENV === "production") {
